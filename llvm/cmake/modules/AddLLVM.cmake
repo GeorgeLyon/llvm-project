@@ -6,7 +6,7 @@ include(DetermineGCCCompatible)
 
 function(llvm_update_compile_flags name)
   get_property(sources TARGET ${name} PROPERTY SOURCES)
-  if("${sources}" MATCHES "\\.c(;|$)")
+  if("${sources}" MATCHES "\\.(c|swift)(;|$)")
     set(update_src_props ON)
   endif()
 
@@ -68,19 +68,20 @@ function(llvm_update_compile_flags name)
       if("${suf}" STREQUAL ".cpp")
         set_property(SOURCE ${fn} APPEND_STRING PROPERTY
           COMPILE_FLAGS "${target_compile_flags}")
+        set_property(SOURCE ${fn} APPEND PROPERTY COMPILE_DEFINITIONS ${LLVM_COMPILE_DEFINITIONS})
       endif()
       if("${suf}" STREQUAL ".c")
         set_property(SOURCE ${fn} APPEND_STRING PROPERTY
           COMPILE_FLAGS "${target_compile_cflags}")
+        set_property(SOURCE ${fn} APPEND PROPERTY COMPILE_DEFINITIONS ${LLVM_COMPILE_DEFINITIONS})
       endif()
     endforeach()
   else()
     # Update target props, since all sources are C++.
     set_property(TARGET ${name} APPEND_STRING PROPERTY
       COMPILE_FLAGS "${target_compile_flags}")
+    set_property(TARGET ${name} APPEND PROPERTY COMPILE_DEFINITIONS ${LLVM_COMPILE_DEFINITIONS})
   endif()
-
-  set_property(TARGET ${name} APPEND PROPERTY COMPILE_DEFINITIONS ${LLVM_COMPILE_DEFINITIONS})
 endfunction()
 
 function(add_llvm_symbol_exports target_name export_file)
@@ -2346,8 +2347,9 @@ function(llvm_setup_rpath name)
     endif()
     if(LLVM_LINKER_IS_GNULD)
       # $ORIGIN is not interpreted at link time by ld.bfd
-      set_property(TARGET ${name} APPEND_STRING PROPERTY
-                   LINK_FLAGS " -Wl,-rpath-link,${LLVM_LIBRARY_OUTPUT_INTDIR} ")
+      target_link_options(
+        ${name}
+        PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:-Wl,-rpath-link,${LLVM_LIBRARY_OUTPUT_INTDIR}>)
     endif()
   else()
     return()
