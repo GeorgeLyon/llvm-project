@@ -57,7 +57,9 @@ class IRUnit;
 ///    processRequest(request, cxt);
 ///  }
 ///
-class MLIRContext {
+class __attribute__((swift_attr("import_as_ref")))
+__attribute__((swift_attr("retain:immortal")))
+__attribute__((swift_attr("release:immortal"))) MLIRContext {
 public:
   enum class Threading { DISABLED, ENABLED };
   /// Create a new Context.
