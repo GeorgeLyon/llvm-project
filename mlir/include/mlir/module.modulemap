@@ -1,0 +1,6 @@
+module MLIR_IR {
+  requires cplusplus
+  
+  umbrella "IR"
+  module * { export * }
+}
